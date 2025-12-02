@@ -105,12 +105,12 @@ func GetFirstMapKey[K comparable, V any](m map[K]V) K {
 
 func GetUniqueValues[T comparable](values []T) []T {
 	m := make(map[T]bool)
+	out := make([]T, 0, len(values))
 	for _, v := range values {
-		m[v] = true
-	}
-	out := make([]T, 0, len(m))
-	for k := range m {
-		out = append(out, k)
+		if _, alreadySeen := m[v]; !alreadySeen {
+			m[v] = true
+			out = append(out, v)
+		}
 	}
 	return out
 }

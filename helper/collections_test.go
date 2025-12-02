@@ -108,3 +108,10 @@ func TestRemoveIndex(t *testing.T) {
 		require.Equal(t, []int{1, 2, 3, 4}, original)
 	})
 }
+
+func TestGetUniqueValues(t *testing.T) {
+	require.Equal(t, []int{}, GetUniqueValues([]int{}))
+	require.Equal(t, []int{7}, GetUniqueValues([]int{7}))
+	require.Equal(t, []int{7, 8, 3}, GetUniqueValues([]int{7, 8, 7, 3}))
+	require.Equal(t, []string{"foo", "bar"}, GetUniqueValues([]string{"foo", "foo", "bar", "foo", "bar"}))
+}

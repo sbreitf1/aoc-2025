@@ -23,9 +23,14 @@ func (pq *PriorityQueue[P, T]) Push(priority P, obj T) {
 }
 
 // Pop removes and returns the element with lowest priority value.
-func (pq *PriorityQueue[P, T]) Pop() (T, P) {
+func (pq *PriorityQueue[P, T]) Pop() (T, P, bool) {
+	if pq.Len() == 0 {
+		var defaultT T
+		var defaultP P
+		return defaultT, defaultP, false
+	}
 	item := heap.Pop(&pq.items).(*priorityQueueItem[P, T])
-	return item.Object, item.Priority
+	return item.Object, item.Priority, true
 }
 
 func (pq *PriorityQueue[P, T]) Len() int {

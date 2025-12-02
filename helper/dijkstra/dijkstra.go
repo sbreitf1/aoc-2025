@@ -37,7 +37,7 @@ func FindPath[D helper.Number, T comparable](from, to T, params Params[D, T]) ([
 	queue.Push(0, Crumb{Obj: from, Previous: nil})
 	seen := make(map[T]Crumb)
 	for queue.Len() > 0 {
-		c, dist := queue.Pop()
+		c, dist, _ := queue.Pop()
 		if params.Equals(c.Obj, to) {
 			seen[c.Obj] = c
 			path := make([]T, 0)
@@ -69,7 +69,7 @@ func FindPath[D helper.Number, T comparable](from, to T, params Params[D, T]) ([
 	return nil, 0, false
 }
 
-func NewDefaultFieldSuccessorGenerator(field [][]rune, floorRunes, wallRunes []rune) func(current helper.Vec2D[int], currentDist int) []Successor[int, helper.Vec2D[int]] {
+func NewRuneFieldSuccessorGenerator(field [][]rune, wallRunes []rune) func(current helper.Vec2D[int], currentDist int) []Successor[int, helper.Vec2D[int]] {
 	wallMap := make(map[rune]bool)
 	for _, r := range wallRunes {
 		wallMap[r] = true
