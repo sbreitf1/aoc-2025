@@ -59,7 +59,7 @@ func SumInvalidIDsPart2(ranges []Range) int64 {
 		for i := 2; i < 16; i++ {
 			invalidIDs = append(invalidIDs, GetInvalidIDs(r, i)...)
 		}
-		invalidIDs = helper.RemoveDoubles(invalidIDs)
+		invalidIDs = helper.GetUniqueValues(invalidIDs)
 		for _, id := range invalidIDs {
 			sum += int64(id)
 		}
