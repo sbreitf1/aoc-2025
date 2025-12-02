@@ -114,3 +114,16 @@ func GetUniqueValues[T comparable](values []T) []T {
 	}
 	return out
 }
+
+func RemoveDoubles[T comparable](values []T) []T {
+	m := make(map[T]struct{}, len(values))
+	for _, v := range values {
+		m[v] = struct{}{}
+	}
+
+	outValues := make([]T, 0, len(m))
+	for v := range m {
+		outValues = append(outValues, v)
+	}
+	return outValues
+}

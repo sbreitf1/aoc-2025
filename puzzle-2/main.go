@@ -14,10 +14,10 @@ func main() {
 
 	ranges := ParseRanges(lines)
 
-	solution1 := SumInvalidIDs(ranges)
+	solution1 := SumInvalidIDsPart1(ranges)
 	fmt.Println("-> part 1:", solution1)
 
-	solution2 := 0
+	solution2 := SumInvalidIDsPart2(ranges)
 	fmt.Println("-> part 1:", solution2)
 }
 
@@ -41,10 +41,10 @@ func ParseRanges(lines []string) []Range {
 	return ranges
 }
 
-func SumInvalidIDs(ranges []Range) int64 {
+func SumInvalidIDsPart1(ranges []Range) int64 {
 	var sum int64
 	for _, r := range ranges {
-		invalidIDs := GetInvalidIDs(r)
+		invalidIDs := GetInvalidIDs(r, 2)
 		for _, id := range invalidIDs {
 			sum += int64(id)
 		}
@@ -52,18 +52,38 @@ func SumInvalidIDs(ranges []Range) int64 {
 	return sum
 }
 
-func GetInvalidIDs(idRange Range) []int {
+func SumInvalidIDsPart2(ranges []Range) int64 {
+	var sum int64
+	for _, r := range ranges {
+		invalidIDs := make([]int, 0)
+		for i := 2; i < 16; i++ {
+			invalidIDs = append(invalidIDs, GetInvalidIDs(r, i)...)
+		}
+		invalidIDs = helper.RemoveDoubles(invalidIDs)
+		for _, id := range invalidIDs {
+			sum += int64(id)
+		}
+	}
+	return sum
+}
+
+func GetInvalidIDs(idRange Range, numParts int) []int {
 	minLen := helper.Digits(idRange.Min)
 	maxLen := helper.Digits(idRange.Max)
 
 	invalidIDs := make([]int, 0)
 	for l := minLen; l <= maxLen; l++ {
-		if l%2 == 0 {
-			pow := int(math.Pow10(l / 2))
-			minID := int(math.Pow10(l/2 - 1))
+		if l%numParts == 0 {
+			partLen := l / numParts
+			pow := int(math.Pow10(partLen))
+			minID := int(math.Pow10(partLen - 1))
 			maxID := 10*minID - 1
 			for idPart := minID; idPart <= maxID; idPart++ {
-				id := pow*idPart + idPart
+				var id int
+				for i := 0; i < numParts; i++ {
+					id += int(math.Pow(float64(pow), float64(i))) * idPart
+				}
+
 				if id < idRange.Min {
 					continue
 				}
