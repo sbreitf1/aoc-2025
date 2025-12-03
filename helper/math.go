@@ -1,6 +1,9 @@
 package helper
 
-import "strconv"
+import (
+	"math"
+	"strconv"
+)
 
 type Integer interface {
 	~int | ~int8 | ~int16 | ~int32 | ~int64 | ~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 | ~uintptr
@@ -88,6 +91,10 @@ func Mod[T Integer](d, m T) T {
 		return res + m
 	}
 	return res
+}
+
+func Pow[T Number](x, y T) T {
+	return T(math.Pow(float64(x), float64(y)))
 }
 
 func SumAll[OUT, T Number](values []T) OUT {
