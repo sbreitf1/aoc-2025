@@ -16,7 +16,7 @@ func main() {
 	fmt.Println("-> part 1:", solution1)
 
 	solution2 := SumMaxJoltages(banks, 12)
-	fmt.Println("-> part 1:", solution2)
+	fmt.Println("-> part 2:", solution2)
 }
 
 type BatteryBank []int

@@ -18,7 +18,7 @@ func main() {
 	fmt.Println("-> part 1:", solution1)
 
 	solution2 := SumInvalidIDsPart2(ranges)
-	fmt.Println("-> part 1:", solution2)
+	fmt.Println("-> part 2:", solution2)
 }
 
 type Range struct {

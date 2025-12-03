@@ -15,7 +15,7 @@ func main() {
 
 	solution1, solution2 := CountZeros(rotations)
 	fmt.Println("-> part 1:", solution1)
-	fmt.Println("-> part 1:", solution2)
+	fmt.Println("-> part 2:", solution2)
 }
 
 func ParseRotations(lines []string) []int {
