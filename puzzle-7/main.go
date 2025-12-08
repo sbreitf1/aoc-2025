@@ -12,28 +12,30 @@ func main() {
 
 	field := helper.NewRuneFieldFromLines(lines)
 
-	solution1 := CountBeamSplits(&field, field.MustFindOnce('S').X)
+	solution1, solution2 := CountBeamSplits(&field, field.MustFindOnce('S').X)
 	fmt.Println("-> part 1:", solution1)
-
-	solution2 := 0
 	fmt.Println("-> part 2:", solution2)
 }
 
-func CountBeamSplits(field *helper.Field[rune], startX int) int {
+func CountBeamSplits(field *helper.Field[rune], startX int) (int, int64) {
 	var totalSplitCount int
-	beams := []int{startX}
+	beams := map[int]int64{startX: 1}
 	for y := 0; y < field.Height(); y++ {
-		newBeams := make(map[int]int)
-		for _, b := range beams {
-			if field.AtXY(b, y) == '^' {
+		newBeams := make(map[int]int64)
+		for x, c := range beams {
+			if field.AtXY(x, y) == '^' {
 				totalSplitCount++
-				newBeams[b-1] = newBeams[b-1] + 1
-				newBeams[b+1] = newBeams[b+1] + 1
+				newBeams[x-1] = newBeams[x-1] + c
+				newBeams[x+1] = newBeams[x+1] + c
 			} else {
-				newBeams[b] = newBeams[b] + 1
+				newBeams[x] = newBeams[x] + c
 			}
 		}
-		beams = helper.GetKeySlice(newBeams)
+		beams = helper.Clone(newBeams)
 	}
-	return totalSplitCount
+	var timelineCount int64
+	for _, c := range beams {
+		timelineCount += c
+	}
+	return totalSplitCount, timelineCount
 }
