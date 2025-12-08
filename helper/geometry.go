@@ -78,6 +78,10 @@ func (p Vec3D[T]) Mul(factor T) Vec3D[T] {
 	return Vec3D[T]{X: p.X * factor, Y: p.Y * factor, Z: p.Z * factor}
 }
 
+func (p Vec3D[T]) Len() float64 {
+	return math.Sqrt(float64(p.X*p.X) + float64(p.Y*p.Y) + float64(p.Z*p.Z))
+}
+
 func (p Vec3D[T]) XY() Vec2D[T] {
 	return Vec2D[T]{X: p.X, Y: p.Y}
 }
