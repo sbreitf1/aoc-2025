@@ -1,6 +1,8 @@
 package helper
 
-import "math"
+import (
+	"math"
+)
 
 type Vec2D[T Number] struct {
 	X, Y T
@@ -88,4 +90,41 @@ func (p Vec3D[T]) Len() float64 {
 
 func (p Vec3D[T]) XY() Vec2D[T] {
 	return Vec2D[T]{X: p.X, Y: p.Y}
+}
+
+type Polygon2Di[T Integer] struct {
+	corners []Vec2D[T]
+}
+
+func NewPolygon2Di[T Integer](corners []Vec2D[T]) Polygon2Di[T] {
+	return Polygon2Di[T]{
+		corners: corners,
+	}
+}
+
+func (poly Polygon2Di[T]) IsInside(p Vec2D[T]) bool {
+	var windingNumber float64
+	for i := 0; i < len(poly.corners); i++ {
+		windingNumber += computeWindingNumberOfLine(p, poly.corners[i], poly.corners[(i+1)%len(poly.corners)])
+	}
+	return windingNumber < -0.1 || windingNumber > 0.1
+}
+
+func computeWindingNumberOfLine[T Number](p, l1, l2 Vec2D[T]) float64 {
+	if p.X == l1.X && p.X == l2.X {
+		return 0
+	}
+	if p.Y == l1.Y && p.Y == l2.Y {
+		return 0
+	}
+	a1 := math.Atan2(float64(p.Y)-float64(l1.Y), float64(p.X)-float64(l1.X))
+	a2 := math.Atan2(float64(p.Y)-float64(l2.Y), float64(p.X)-float64(l2.X))
+	diff := a2 - a1
+	if diff >= math.Pi {
+		diff -= 2 * math.Pi
+	}
+	if diff <= -math.Pi {
+		diff += 2 * math.Pi
+	}
+	return diff
 }
