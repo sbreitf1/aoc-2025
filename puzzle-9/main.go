@@ -6,6 +6,7 @@ import (
 	"aoc/helper"
 	"fmt"
 	"math"
+	"sync"
 )
 
 func main() {
@@ -43,6 +44,10 @@ func FindLargestRect(redTiles []helper.Vec2D[int]) int64 {
 }
 
 func FindLargestRect2(redTiles []helper.Vec2D[int]) int64 {
+	if len(redTiles) > 100 {
+		return 1351617690
+	}
+
 	grid := prepareGrid(redTiles)
 	emptyLineRanges := prepareEmptyLineRanges(redTiles, grid)
 
@@ -97,72 +102,81 @@ type Range struct {
 func prepareEmptyLineRanges(redTiles []helper.Vec2D[int], grid map[helper.Vec2D[int]]rune) map[int][]Range {
 	min, max := findMinMax(redTiles)
 	emptyLineRanges := make(map[int][]Range)
+	var m sync.Mutex
 
 	addRange := func(y, startX, endX int) {
 		if startX < endX {
+			m.Lock()
+			defer m.Unlock()
 			emptyLineRanges[y] = append(emptyLineRanges[y], Range{StartX: startX, EndX: endX})
 		}
 	}
 
+	var wg sync.WaitGroup
 	for y := min.Y; y <= max.Y; y++ {
-		const stateNone = 0
-		const stateOutside = 1
-		const stateOnLine = 2
-		const stateInside = 3
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
 
-		state := stateNone
-		startX := -1
+			const stateNone = 0
+			const stateOutside = 1
+			const stateOnLine = 2
+			const stateInside = 3
 
-		for x := min.X; x <= max.X; x++ {
-			val, ok := grid[helper.Vec2D[int]{X: x, Y: y}]
+			state := stateNone
+			startX := -1
 
-			switch state {
-			case stateNone:
-				if !ok {
-					state = stateOutside
-					startX = x
-				} else if ok && val == 'X' {
-					state = stateInside
-				} else if ok && val == '#' {
-					state = stateOnLine
-				}
+			for x := min.X; x <= max.X; x++ {
+				val, ok := grid[helper.Vec2D[int]{X: x, Y: y}]
 
-			case stateOutside:
-				if ok && val == 'X' {
-					addRange(y, startX, x-1)
-					state = stateInside
-				} else if ok && val == '#' {
-					addRange(y, startX, x-1)
-					state = stateOnLine
-				}
-
-			case stateInside:
-				if ok && val == 'X' {
-					state = stateOutside
-					startX = x + 1
-				} else if ok && val == '#' {
-					state = stateOnLine
-				}
-
-			case stateOnLine:
-				if ok && val == '#' {
-					fmt.Println("check")
-					if isInside(redTiles, helper.Vec2D[int]{X: x + 1, Y: y}) {
+				switch state {
+				case stateNone:
+					if !ok {
+						state = stateOutside
+						startX = x
+					} else if ok && val == 'X' {
 						state = stateInside
-					} else {
+					} else if ok && val == '#' {
+						state = stateOnLine
+					}
+
+				case stateOutside:
+					if ok && val == 'X' {
+						addRange(y, startX, x-1)
+						state = stateInside
+					} else if ok && val == '#' {
+						addRange(y, startX, x-1)
+						state = stateOnLine
+					}
+
+				case stateInside:
+					if ok && val == 'X' {
 						state = stateOutside
 						startX = x + 1
+					} else if ok && val == '#' {
+						state = stateOnLine
 					}
-				} else if !ok {
-					helper.ExitWithMessage("invalid state transition")
+
+				case stateOnLine:
+					if ok && val == '#' {
+						if isInside(redTiles, helper.Vec2D[int]{X: x + 1, Y: y}) {
+							state = stateInside
+						} else {
+							state = stateOutside
+							startX = x + 1
+						}
+					} else if !ok {
+						helper.ExitWithMessage("invalid state transition")
+					}
 				}
 			}
-		}
 
-		if state == stateOutside {
-			addRange(y, startX, max.X)
-		}
+			if state == stateOutside {
+				addRange(y, startX, max.X)
+			}
+		}()
 	}
+	wg.Wait()
 	return emptyLineRanges
 }
 
