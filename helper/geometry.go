@@ -50,6 +50,10 @@ func (p Vec2D[T]) Dist(p2 Vec2D[T]) float64 {
 	return p.Sub(p2).Len()
 }
 
+func (p Vec2D[T]) Normalized() Vec2D[T] {
+	return ConvertVec2D[float64, T](ConvertVec2D[T, float64](p).Div(p.Len()))
+}
+
 func (p Vec2D[T]) InBounds(min, max Vec2D[T]) bool {
 	return p.X >= min.X && p.Y >= min.Y && p.X <= max.X && p.Y <= max.Y
 }
