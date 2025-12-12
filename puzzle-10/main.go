@@ -157,11 +157,17 @@ func (j Joltage) String() string {
 	return str + "}"
 }
 
-func (j Joltage) Increase(indices []int) Joltage {
+func (j Joltage) Slice() []int {
+	values := make([]int, j.count)
+	copy(values, j.values[:j.count])
+	return values
+}
+
+func (j Joltage) Increase(indices []int, delta int) Joltage {
 	var newValues [64]int
 	copy(newValues[:], j.values[:])
 	for _, idx := range indices {
-		newValues[idx]++
+		newValues[idx] += delta
 	}
 	return Joltage{
 		values: newValues,
@@ -182,47 +188,49 @@ func (j Joltage) Exceeds(other Joltage) bool {
 	return false
 }
 
+func (m *Machine) findMinButtonPresses2(currentJoltage Joltage, btnIndex int) (int, bool) {
+	if currentJoltage == m.DstJoltage {
+		return 0, true
+	}
+	if btnIndex >= len(m.Buttons) {
+		return 0, false
+	}
+
+	var btnPresses int
+
+	bestResult := 100000000
+	hasResult := false
+
+	for {
+		followingPresses, ok := m.findMinButtonPresses2(currentJoltage, btnIndex+1)
+		if ok && (btnPresses+followingPresses) < bestResult {
+			bestResult = btnPresses + followingPresses
+			hasResult = true
+		}
+
+		currentJoltage = currentJoltage.Increase(m.Buttons[btnIndex], 1)
+		if currentJoltage.Exceeds(m.DstJoltage) {
+			break
+		}
+		btnPresses++
+	}
+
+	return bestResult, hasResult
+}
+
 func (m *Machine) FindMinButtonPresses2() int {
-	type state struct {
-		Joltage Joltage
+	result, ok := m.findMinButtonPresses2(m.StartJoltage(), 0)
+	if !ok {
+		helper.ExitWithMessage("no solution for part 2 found")
 	}
-
-	initState := state{
-		Joltage: m.StartJoltage(),
-	}
-
-	dstState := state{
-		Joltage: m.DstJoltage,
-	}
-
-	_, pressCount := dijkstra.MustFindPath(initState, dstState, dijkstra.Params[int, state]{
-		SuccessorGenerator: func(current state, currentDist int) []dijkstra.Successor[int, state] {
-			successors := make([]dijkstra.Successor[int, state], 0, len(m.Buttons))
-			for _, b := range m.Buttons {
-				next := state{
-					Joltage: current.Joltage.Increase(b),
-				}
-				if !next.Joltage.Exceeds(m.DstJoltage) {
-					successors = append(successors, dijkstra.Successor[int, state]{
-						Obj:  next,
-						Dist: currentDist + 1,
-					})
-				}
-			}
-			return successors
-		},
-	})
-	return pressCount
+	return result
 }
 
 func SumMinButtonPresses2(machines []Machine) int {
-	if len(machines) > 10 {
-		helper.ExitWithMessage("part 2 not yet solved for real input")
-	}
-
 	var sum int
 	for _, m := range machines {
 		sum += m.FindMinButtonPresses2()
+		fmt.Println(sum)
 	}
 	return sum
 }
