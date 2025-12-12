@@ -110,3 +110,11 @@ func ParseInt[T Integer](str string) T {
 	ExitOnError(err, "failed to parse int from %q", str)
 	return T(val)
 }
+
+func ConvertNums[I, O Number](input []I) []O {
+	output := make([]O, len(input))
+	for i := range input {
+		output[i] = O(input[i])
+	}
+	return output
+}

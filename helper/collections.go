@@ -73,25 +73,35 @@ func GetKeySlice[K comparable, V any](m map[K]V) []K {
 }
 
 func LinesToRunes(lines []string) [][]rune {
-	return MapValues(lines, func(line string) []rune {
+	return MapValuesWithFunc(lines, func(line string) []rune {
 		return []rune(line)
 	})
 }
 
 func RunesToLines(runeLines [][]rune) []string {
-	return MapValues(runeLines, func(line []rune) string {
+	return MapValuesWithFunc(runeLines, func(line []rune) string {
 		return string(line)
 	})
 }
 
 func TrimSpaces(lines []string) []string {
-	return MapValues(lines, strings.TrimSpace)
+	return MapValuesWithFunc(lines, strings.TrimSpace)
 }
 
-func MapValues[IN, OUT any](values []IN, mapFunc func(IN) OUT) []OUT {
+func MapValuesWithFunc[IN, OUT any](values []IN, mapFunc func(IN) OUT) []OUT {
 	out := make([]OUT, len(values))
 	for i := range values {
 		out[i] = mapFunc(values[i])
+	}
+	return out
+}
+
+func MapValuesIgnoreUnknown[IN comparable, OUT any](values []IN, mapMap map[IN]OUT) []OUT {
+	out := make([]OUT, len(values))
+	for i := range values {
+		if outVal, ok := mapMap[values[i]]; ok {
+			out[i] = outVal
+		}
 	}
 	return out
 }

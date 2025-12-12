@@ -1,5 +1,10 @@
 package helper
 
+import (
+	"fmt"
+	"strings"
+)
+
 func Dirs4() []Vec2D[int] {
 	return []Vec2D[int]{{X: 0, Y: -1}, {X: -1, Y: 0}, {X: 1, Y: 0}, {X: 0, Y: 1}}
 }
@@ -18,8 +23,24 @@ func NewRuneFieldFromLines(lines []string) Field[rune] {
 	}
 }
 
+func NewRuneField(width, height int, empty rune) Field[rune] {
+	lines := make([]string, height)
+	for y := range lines {
+		lines[y] = strings.Repeat(string(empty), width)
+	}
+	return NewRuneFieldFromLines(lines)
+}
+
 func (f Field[T]) Print() {
-	//TODO print
+	for y := 0; y < f.Height(); y++ {
+		for x := 0; x < f.Width(); x++ {
+			switch val := any(f.Field[y][x]).(type) {
+			case rune:
+				fmt.Print(string(val))
+			}
+		}
+		fmt.Println()
+	}
 }
 
 func (f Field[T]) Width() int {
@@ -64,6 +85,10 @@ func (f Field[T]) AtXY(x, y int) T {
 
 func (f Field[T]) Set(p Vec2D[int], val T) {
 	f.Field[p.Y][p.X] = val
+}
+
+func (f Field[T]) SetXY(x, y int, val T) {
+	f.Field[y][x] = val
 }
 
 func (f Field[T]) InBounds(p Vec2D[int]) bool {
